@@ -9,6 +9,8 @@ try:
             password=cfg.db_password,
             database=cfg.db_name,
     ) as connection:
+        print('Connect successfully')
         print(connection)
 except Error as e:
+    print('Connect error')
     print(e)
