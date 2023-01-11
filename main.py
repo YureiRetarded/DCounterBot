@@ -60,5 +60,17 @@ async def on_message(message):
         db_adapater.update_members_guild(guild.id, members)
         await message.channel.send("Список обновлён")
 
+    if message.content.startswith('$addNom'):
+        text = message.content.split(' ')
+        if len(text) > 1 and text[1] != ' ':
+            result = db_adapater.create_nomination(db_adapater.get_server(message.guild.id)[0][0], text[1])
+            print(result)
+            if result != None:
+                await message.channel.send(result[1])
+            else:
+                await message.channel.send("Номинация добавлена")
+        else:
+            await message.channel.send("Ошибка при добавлении номинации")
+
 
 client.run(cfg.token, log_handler=handler)

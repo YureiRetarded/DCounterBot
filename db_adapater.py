@@ -79,6 +79,40 @@ def get_nomination(server_id):
     return db_select_one(query)
 
 
+def hasNomination(server_id):
+    query = 'SELECT * FROM nominations WHERE server_id=' + str(server_id)
+    return db_select_one(query)
+
+
+def create_nomination(server_id, name):
+    if hasNomination(server_id) == None:
+        if len(name) > 30 and len(name) < 3:
+            return [False, 'Слишком длинное название!']
+        query = 'INSERT INTO nominations (server_id,name) VALUES (' + str(server_id) + ",'" + str(name) + "')"
+        return db_create(query)
+    else:
+        return [False, 'Номинация уже есть!']
+
+
+def add_user_to_nominate(nom_id, user_id):
+    query = 'INSERT INTO nomination_user (nomination_id,user_id) VALUES (' + str(nom_id) + ',' + str(user_id) + ')'
+    return db_create(query)
+
+
+def get_user_nominate(user_id, nom_id):
+    query = 'SELECT nomination_id,user_id,count FROM nomination_user WHERE nomination_id=' + str(
+        nom_id) + ' AND user_id=' + str(user_id)
+    return db_select_one(query)
+
+
+# def add_users_to_nomination(server_id, members):
+#     server = get_server(server_id)
+#     nom = get_nomination(server[0])
+#     for person in members:
+#         if get_user(server[1], person.id) != None:
+#             addUser(server[0], person.id)
+#
+
 def get_nomination_users(nomination_id):
     query = 'SELECT nomination_id,user_id,count FROM nomination_user WHERE nomination_id=' + str(nomination_id)
     return db_select_one(query)
