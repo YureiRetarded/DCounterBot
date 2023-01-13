@@ -86,8 +86,8 @@ def hasNomination(server_id):
 
 def create_nomination(server_id, name):
     if hasNomination(server_id) == None:
-        if len(name) > 30 and len(name) < 3:
-            return [False, 'Слишком длинное название!']
+        if len(name) > 10 and len(name) < 3:
+            return [False, 'Длина названия должна быть от 3 символов до 10!']
         query = 'INSERT INTO nominations (server_id,name) VALUES (' + str(server_id) + ",'" + str(name) + "')"
         return db_create(query)
     else:
@@ -126,6 +126,9 @@ def get_nomination_users(nomination_id):
     query = 'SELECT nomination_id,user_id,count FROM nomination_user WHERE nomination_id=' + str(nomination_id)
     return db_select_one(query)
 
+def get_nomination_users_by_server(server_id):
+    query = 'SELECT nomination_user.count, users.discord_user_id, nominations.name FROM nomination_user LEFT JOIN(users,nominations,servers) ON (nomination_user.user_id=users.id AND nomination_user.nomination_id=nominations.id AND nominations.server_id=servers.id) WHERE servers.id=' + str(server_id)
+    return db_select_one(query)
 
 def get_user_nominations(user_id, server_id):
     query = '''SELECT servers.discord_server_id, users.discord_user_id, nominations.name, nomination_user.count

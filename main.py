@@ -53,11 +53,20 @@ async def on_message(message):
             await message.channel.send(f"<@{user_id}> {nom[1]}")
 
     if message.content.startswith('$list'):
-        await message.channel.send(f"<Список скоро появится!")
+        guild = client.get_guild(message.guild.id)
+        id_server = db_adapater.get_server(guild.id)[0][0]
+        list = db_adapater.get_nomination_users_by_server(id_server)
+        if list != None:
+            mes = f'Список наших победителей на звание "{list[0][2]}"\n Имя - Количество\n\n'
+            for row in list:
+                mes_row = f'<@{row[1]}> - {row[0]}\n'
+                mes = mes + mes_row
+            await message.channel.send(mes)
+        else:
+            await message.channel.send("Вы ещё не разу не разыгрывали звание среди участников!")
 
     if message.content.startswith('$regServer'):
         server = db_adapater.get_server(message.guild.id)
-
         if server != None:
             await message.channel.send("Сервер уже зарегистрирован!")
         else:
@@ -84,5 +93,8 @@ async def on_message(message):
         else:
             await message.channel.send("Ошибка при добавлении номинации")
 
+    if message.content.startswith('$help'):
+        text='Список команд бота:\n$regServer - Регистрация сервера\n$addNom *название* - Название вашей номинации\n$random - Проведения розыгрыша\n$list - список участников и их количество побед\nВерсия бота: 0.2.0'
+        await message.channel.send(text)
 
 client.run(cfg.token, log_handler=handler)
