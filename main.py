@@ -37,10 +37,23 @@ async def on_message(message):
     if message.content.startswith('$random'):
         guild = client.get_guild(message.guild.id)
         members = guild.members
+        db_adapater.update_members_guild(guild.id, members)
         number = random.randint(1, message.guild.member_count)
         user = guild.members[number - 1]
         user_id = user.id
-        await message.channel.send(f"<@{user_id}> is winner")
+        id_server = db_adapater.get_server(guild.id)[0][0]
+        nom = db_adapater.get_nomination(id_server)[0]
+        if id_server == None:
+            await message.channel.send(f"Зарегистрируйте сервер командой $regServer")
+        elif nom == None:
+            await message.channel.send(f"Добавьте номинацию командой $addNom 'Название номинации'")
+        else:
+            id_user = db_adapater.get_user(guild.id, user_id)[0][0]
+            db_adapater.add_user_to_nominate(nom[0], id_user)
+            await message.channel.send(f"<@{user_id}> {nom[1]}")
+
+    if message.content.startswith('$list'):
+        await message.channel.send(f"<Список скоро появится!")
 
     if message.content.startswith('$regServer'):
         server = db_adapater.get_server(message.guild.id)
@@ -54,17 +67,16 @@ async def on_message(message):
             db_adapater.update_members_guild(guild.id, members)
             await message.channel.send("Сервак зарегистрирован!")
 
-    if message.content.startswith('$regPeople'):
-        guild = client.get_guild(message.guild.id)
-        members = guild.members
-        db_adapater.update_members_guild(guild.id, members)
-        await message.channel.send("Список обновлён")
+    # if message.content.startswith('$regPeople'):
+    #     guild = client.get_guild(message.guild.id)
+    #     members = guild.members
+    #     db_adapater.update_members_guild(guild.id, members)
+    #     await message.channel.send("Список обновлён")
 
     if message.content.startswith('$addNom'):
         text = message.content.split(' ')
         if len(text) > 1 and text[1] != ' ':
             result = db_adapater.create_nomination(db_adapater.get_server(message.guild.id)[0][0], text[1])
-            print(result)
             if result != None:
                 await message.channel.send(result[1])
             else:

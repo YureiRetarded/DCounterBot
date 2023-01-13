@@ -54,7 +54,7 @@ def create_server(discord_server_id):
 
 def get_user(server_id, user_id):
     query = '''SELECT users.id, users.discord_user_id, users.server_id
-     FROM dcounter.users
+     FROM users
       LEFT JOIN (servers)
        ON (servers.id=users.server_id)
         WHERE servers.discord_server_id=''' + str(server_id) + ' AND users.discord_user_id=' + str(user_id)
@@ -95,8 +95,17 @@ def create_nomination(server_id, name):
 
 
 def add_user_to_nominate(nom_id, user_id):
-    query = 'INSERT INTO nomination_user (nomination_id,user_id) VALUES (' + str(nom_id) + ',' + str(user_id) + ')'
-    return db_create(query)
+    if get_user_nominate(user_id, nom_id) != None:
+        count = get_user_nominate(user_id, nom_id)[0][2]
+        count += 1
+        query = 'UPDATE nomination_user SET count=' + str(count) + ' WHERE nomination_id=' + str(
+            nom_id) + ' AND user_id=' + str(user_id)
+        return db_create(query)
+
+    else:
+        query = 'INSERT INTO nomination_user(nomination_id,user_id,count) VALUES(' + str(nom_id) + ',' + str(
+            user_id) + ',1)'
+        return db_create(query)
 
 
 def get_user_nominate(user_id, nom_id):
