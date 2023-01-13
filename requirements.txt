@@ -1,0 +1,2 @@
+betterconf~=2.6.1
+mysql-connector-python~=8.0.31
